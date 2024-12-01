@@ -1,0 +1,6 @@
+.vscode/settings.json
+cpp_sol/cmake-build-debug/
+cpp_sol/.idea/
+cpp-sol/
+cpp_sol/CMakeLists.txt
+*.out

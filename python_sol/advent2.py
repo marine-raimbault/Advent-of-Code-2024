@@ -66,8 +66,43 @@ def test_count_safe_reports():
     ]
     assert count_safe_reports(reports) == 2
 
-# Test
+# Test Part 1
 def test_check_reports():
     assert check_reports("input2_test.txt") == 2
-    # assert check_reports("input2.txt") == 279
+    # assert check_reports("input2.txt") 
 
+
+## Part 2
+def test_is_almost_safe():
+    assert is_almost_safe([1, 3, 2, 4, 5]) == True
+
+def is_increasing(report):
+    return all(1 <= report[i+1] - report[i] <= 3 for i in range(len(report) - 1))
+
+def is_decreasing(report):
+    return all(1 <= report[i] - report[i+1] <= 3 for i in range(len(report) - 1))
+
+def is_almost_safe(report):
+    for j in range (len(report)):
+        sub_report = report[:j] + report[j+1:]
+        if is_increasing(sub_report) or is_decreasing(sub_report):
+          return True
+    return False
+
+def count_almost_safe_reports(reports):
+    safe_count = 0
+    for report in reports:
+        levels = convert_to_ints(report)
+        if is_safe(levels) or is_almost_safe(levels):
+            safe_count += 1
+    return safe_count
+
+
+# for advent 2 part 2
+def check_reports2(filename):
+    reports = readFile(filename)
+    return count_almost_safe_reports(reports)
+
+def test_check_reports2():
+    assert check_reports2("input2_test.txt") == 4
+    # assert check_reports2("input2.txt") 

@@ -4,3 +4,6 @@ cpp_sol/.idea/
 cpp-sol/
 cpp_sol/CMakeLists.txt
 *.out
+
+python_sol/.pytest_cache/
+python_sol/__pycache__/

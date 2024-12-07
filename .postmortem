@@ -1,0 +1,6 @@
+using regex, no import needed
+
+// const regex r("(\\d*): ((\\d*) )+");
+// smatch m;
+// regex_search(line, m,r) ;
+// for(auto x:m) cout << x << endl;

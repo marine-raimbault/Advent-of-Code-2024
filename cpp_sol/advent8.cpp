@@ -1,12 +1,3 @@
-
-// for each type of antenna, calculate the position of the antipods 
-    // by hand ? 
-    // get two antennas from the same frequency
-    // then add their dx and dy and 
-
-// and record them alongside their frequency in a set if inside the grid
-// return the size of that set
-
 #include<iostream>
 #include<fstream>
 #include<vector>
@@ -28,38 +19,44 @@ AntennaRecords collectAntennaRecords(Grid& grid);
 vector<Position> findAntinodPos(vector<Position>& antenna_pos, int antenna_location1, int antenna_location2);
 
 // get all combination of 2 index from a set of n 
-set<pair<int,int>> getIndexCombination(int n);  // TODO test 
+set<pair<int,int>> getIndexCombination(int n);  
+
+bool is_in_grid(Grid grid, Position pos){
+    int x = pos.first;
+    int y = pos.second;
+    return x >= 0 && x < grid[0].size() && y >= 0 && y < grid.size();
+}
+
+template <typename T>
+bool is_not_in_the_set(set<T> set, T element){ return set.find(element) == set.end(); }
 
 int main(){
-    ifstream file = readFile("../input/input8_test.txt");
+    ifstream file = readFile("../input/input8_test.txt"); // should be 14 - somehow I get 15
+    // ifstream file = readFile("../input/input8.txt"); 
     Grid grid = readGrid(file);
     AntennaRecords antenna_records = collectAntennaRecords(grid);
+    set<pair<Position, Frequency>> antinode_pos; // antinodes can overlap if there do not have the same freq, so we keep track of the freq.
 
-    set<pair<Position, Frequency>> pod_pos;
+    AntennaRecords::iterator it = antenna_records.begin(); // we are going to go through all antenna records, sorted by frequency
 
-    AntennaRecords::iterator it = antenna_records.begin();
+    for (auto& [freq, antenna_pos] : antenna_records){ // for all the antennas of the same type (same freq)
+        set<pair<int,int>> indexCombination = getIndexCombination(antenna_pos.size());
 
-    // while(it!=antenna_records.end()){ // for all the antennas of the same type (same freq)
-    // for each kombinason of all the pos // TODO, 
-    // getting all the combinations https://stackoverflow.com/questions/12991758/creating-all-possible-k-combinations-of-n-items-in-c
-    Frequency freq = it->first;
-    vector<Position> antenna_pos = it->second;
+        // for each combination of two antennas 
+        for(pair<int,int> twoChosenAntennas : indexCombination){
+            vector<Position> antinodes = findAntinodPos(antenna_pos,twoChosenAntennas.first,twoChosenAntennas.second);
+            
+            if(is_in_grid(grid, antinodes[0]) && is_not_in_the_set(antinode_pos, {antinodes[0], freq})){
+                 antinode_pos.insert({antinodes[0], freq});
+            }
 
-    cout << " size " << antenna_pos.size() << endl;
-    getIndexCombination(antenna_pos.size());
-
-    //for now lets just do it with the first two
-    int antenna_location1 = 0; // p 
-    int antenna_location2 = 0; // q
-
-    vector<Position> antinods = findAntinodPos(antenna_pos,antenna_location1,antenna_location2);
-
-    // if not already in the set, add it 
-
-
-    //    }
-
-    return 1;
+            if(is_in_grid(grid, antinodes[1]) && is_not_in_the_set(antinode_pos, {antinodes[1], freq})){
+                antinode_pos.insert({antinodes[1], freq});
+            }
+        }
+       }
+       cout << "Number of unique antinodes: " << antinode_pos.size() << endl;
+    return 0;
 }
 
 
@@ -88,9 +85,9 @@ AntennaRecords collectAntennaRecords(Grid& grid){
 }
 
 
- vector<Position> findAntinodPos(vector<Position>& antenna_pos, int antenna_location1, int antenna_location2){
-    Position antenna1 = antenna_pos[antenna_location1];
-    Position antenna2 = antenna_pos[antenna_location2];
+ vector<Position> findAntinodPos(vector<Position>& antenna_pos, int twoChosenAntennas1, int twoChosenAntennas2){
+    Position antenna1 = antenna_pos[twoChosenAntennas1]; // p
+    Position antenna2 = antenna_pos[twoChosenAntennas2]; // q
 
     int px = antenna1.first;
     int py = antenna1.second;
@@ -109,10 +106,10 @@ AntennaRecords collectAntennaRecords(Grid& grid){
     int xpos_antipod2 = -1 * pq_x + px;
     int ypos_antipod2 = -1 * pq_y + py;
 
-    vector<Position> antinods_locations;
-    antinods_locations.push_back({xpos_antipod1,ypos_antipod1});
-    antinods_locations.push_back({xpos_antipod2,ypos_antipod2});
-   return antinods_locations;
+    vector<Position> antinodes_locations;
+    antinodes_locations.push_back({xpos_antipod1,ypos_antipod1});
+    antinodes_locations.push_back({xpos_antipod2,ypos_antipod2});
+   return antinodes_locations;
 }
 
 
@@ -120,11 +117,8 @@ AntennaRecords collectAntennaRecords(Grid& grid){
 set<pair<int,int>> getIndexCombination(int n){
     set<pair<int,int>> res;
     for(int i = 0; i < n; i++){
-        for(int j = 1; j < n; j++){
-            if(i != j && res.find({j,i}) == res.end()){ // we don't want (1,1) and we do NOT want to include (1,2) AND (2,1): combination, not permutation
-                res.insert({i,j});
-                cout << i << " " << j << endl;
-            }
+        for(int j = i + 1; j < n; j++){ 
+            res.insert({i,j});
         }
     }
     return res;

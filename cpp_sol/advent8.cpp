@@ -31,11 +31,11 @@ template <typename T>
 bool is_not_in_the_set(set<T> set, T element){ return set.find(element) == set.end(); }
 
 int main(){
-    ifstream file = readFile("../input/input8_test.txt"); // should be 14 - somehow I get 15
-    // ifstream file = readFile("../input/input8.txt"); 
+    // ifstream file = readFile("../input/input8_test.txt"); // should be 14 - somehow I get 15
+    ifstream file = readFile("../input/input8.txt"); 
     Grid grid = readGrid(file);
     AntennaRecords antenna_records = collectAntennaRecords(grid);
-    set<pair<Position, Frequency>> antinode_pos; // antinodes can overlap if there do not have the same freq, so we keep track of the freq.
+    set<Position> antinode_pos; // antinodes can overlap if there do not have the same freq, so we keep track of the freq.
 
     AntennaRecords::iterator it = antenna_records.begin(); // we are going to go through all antenna records, sorted by frequency
 
@@ -47,8 +47,8 @@ int main(){
             vector<Position> antinodes = findAntinodPos(antenna_pos,twoChosenAntennas.first,twoChosenAntennas.second);
             
             for (auto node : antinodes) {
-                if (is_in_grid(grid, node) && is_not_in_the_set(antinode_pos, {node, freq})) {
-                    antinode_pos.insert({node,freq});
+                if (is_in_grid(grid, node) && is_not_in_the_set(antinode_pos, node)) {
+                    antinode_pos.insert(node);
                 }
             }
          

@@ -46,13 +46,12 @@ int main(){
         for(pair<int,int> twoChosenAntennas : indexCombination){
             vector<Position> antinodes = findAntinodPos(antenna_pos,twoChosenAntennas.first,twoChosenAntennas.second);
             
-            if(is_in_grid(grid, antinodes[0]) && is_not_in_the_set(antinode_pos, {antinodes[0], freq})){
-                 antinode_pos.insert({antinodes[0], freq});
+            for (auto node : antinodes) {
+                if (is_in_grid(grid, node) && is_not_in_the_set(antinode_pos, {node, freq})) {
+                    antinode_pos.insert({node,freq});
+                }
             }
-
-            if(is_in_grid(grid, antinodes[1]) && is_not_in_the_set(antinode_pos, {antinodes[1], freq})){
-                antinode_pos.insert({antinodes[1], freq});
-            }
+         
         }
        }
        cout << "Number of unique antinodes: " << antinode_pos.size() << endl;

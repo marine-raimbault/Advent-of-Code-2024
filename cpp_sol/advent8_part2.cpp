@@ -4,9 +4,10 @@
 #include <map>
 #include<set>
 #include<algorithm>
+#include <cmath> 
 
 using namespace std; 
-
+///////////////////////////////////////////////// Part 2
 typedef char Frequency;
 typedef pair<int,int> Position;
 typedef map<Frequency, vector<Position>>  AntennaRecords;   
@@ -15,10 +16,10 @@ typedef vector<vector<Frequency>> Grid;
 ifstream readFile(string filename){return ifstream(filename);}
 Grid readGrid(ifstream& file);
 AntennaRecords collectAntennaRecords(Grid& grid);
+////////////////////////////////////////////////  Same as part 1 so far
 
-vector<Position> findAntinodPos(vector<Position>& antenna_pos, int antenna_location1, int antenna_location2);
+vector<Position> findAntinodPos(vector<Position>& antenna_pos, int antenna_location1, int antenna_location2, Grid grid);
 
-// get all combination of 2 index from a set of n 
 set<pair<int,int>> getIndexCombination(int n);  
 
 bool is_in_grid(Grid grid, Position pos){
@@ -31,18 +32,19 @@ template <typename T>
 bool is_not_in_the_set(set<T> set, T element){ return set.find(element) == set.end(); }
 
 int main(){
-    // ifstream file = readFile("../input/input8_test.txt");
+    // ifstream file = readFile("../input/input8_test.txt"); // should now be 34
     ifstream file = readFile("../input/input8.txt"); 
     Grid grid = readGrid(file);
     AntennaRecords antenna_records = collectAntennaRecords(grid);
     set<Position> antinode_pos; 
 
-    for (auto& [freq, antenna_pos] : antenna_records){ // for all the antennas of the same type (same freq)
+    for (auto& [freq, antenna_pos] : antenna_records){ 
+        if(antenna_pos.size() < 2 ) continue;
         set<pair<int,int>> indexCombination = getIndexCombination(antenna_pos.size());
 
         // for each combination of two antennas 
         for(pair<int,int> twoChosenAntennas : indexCombination){
-            vector<Position> antinodes = findAntinodPos(antenna_pos,twoChosenAntennas.first,twoChosenAntennas.second);
+            vector<Position> antinodes = findAntinodPos(antenna_pos,twoChosenAntennas.first,twoChosenAntennas.second, grid);
             
             for (auto node : antinodes) {
                 if (is_in_grid(grid, node) && is_not_in_the_set(antinode_pos, node)) {
@@ -82,7 +84,7 @@ AntennaRecords collectAntennaRecords(Grid& grid){
 }
 
 
- vector<Position> findAntinodPos(vector<Position>& antenna_pos, int twoChosenAntennas1, int twoChosenAntennas2){
+ vector<Position> findAntinodPos(vector<Position>& antenna_pos, int twoChosenAntennas1, int twoChosenAntennas2, Grid grid){
     Position antenna1 = antenna_pos[twoChosenAntennas1]; // p
     Position antenna2 = antenna_pos[twoChosenAntennas2]; // q
 
@@ -95,17 +97,19 @@ AntennaRecords collectAntennaRecords(Grid& grid){
     int pq_x = qx - px;
     int pq_y = qy - py;
 
-    // we get the position of the antipod by adding 2 times the coordinates of pq to p
-    int xpos_antipod1 = 2 * pq_x + px;
-    int ypos_antipod1 = 2 * pq_y + py;
-
-    // and -1 the coordinates of pq to p
-    int xpos_antipod2 = -1 * pq_x + px;
-    int ypos_antipod2 = -1 * pq_y + py;
 
     vector<Position> antinodes_locations;
-    antinodes_locations.push_back({xpos_antipod1,ypos_antipod1});
-    antinodes_locations.push_back({xpos_antipod2,ypos_antipod2});
+    int diagonal_length = sqrt(pow(grid.size(),2) + pow(grid.size(),2));
+    // we are gonna add in all the points on the line of the two antennas that are in the grid
+    
+    int scale = -diagonal_length;
+    for(int scale = -diagonal_length; scale <= diagonal_length; scale++){
+        int x = scale * pq_x + px;
+        int y = scale * pq_y + py;
+        if(is_in_grid(grid, {x, y })){
+             antinodes_locations.push_back({x,y});
+        }
+    }
    return antinodes_locations;
 }
 
